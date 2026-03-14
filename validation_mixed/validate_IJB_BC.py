@@ -5,9 +5,9 @@ matplotlib.use('Agg')
 import sys, os
 sys.path.insert(0, os.path.dirname(os.getcwd()))
 
-from .validation_mixed.insightface_ijb_helper.dataloader import prepare_dataloader
-from .validation_mixed.insightface_ijb_helper import eval_helper_identification
-from .validation_mixed.insightface_ijb_helper import eval_helper as eval_helper_verification
+from ..validation_mixed.insightface_ijb_helper.dataloader import prepare_dataloader
+from ..validation_mixed.insightface_ijb_helper import eval_helper_identification
+from ..validation_mixed.insightface_ijb_helper import eval_helper as eval_helper_verification
 
 import warnings
 warnings.filterwarnings("ignore")

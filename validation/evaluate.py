@@ -3,8 +3,8 @@ import numpy as np
 import os
 import torch
 from tqdm import tqdm
-from .validation import evaluate_utils
-from .validation_mixed.validate_IJB_BC import fuse_features_with_norm, get_features, evaluate
+from ..validation import evaluate_utils
+from ..validation_mixed.validate_IJB_BC import fuse_features_with_norm, get_features, evaluate
 
 def evaluate1(model, val_loader, device):
     model.eval()
