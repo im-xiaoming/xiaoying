@@ -23,7 +23,7 @@ def fuse_features_with_norm(stacked_embeddings, stacked_norms):
 
 
 class EarlyStopping:
-    def __init__(self, root, backup, drive, model, head, optimizer, patience=3, eps=1e-6):
+    def __init__(self, root, backup, drive, model, head, patience=3, eps=1e-6):
         self.path = os.path.join(root, 'checkpoints')
         self.backup = backup
         self.drive = drive
@@ -34,7 +34,6 @@ class EarlyStopping:
 
         self.model = model
         self.head = head
-        self.optimizer = optimizer
         self.eps = eps
         self.best_acc = float('-inf')
         self.count = 0
@@ -51,7 +50,6 @@ class EarlyStopping:
         checkpoint = {
             'model_state_dict': self.model.state_dict(),
             'head_state_dict': self.head.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
         }
         torch.save(checkpoint, filename)
         print(f'Save temporary checkpoint to {filename}\n')
@@ -64,7 +62,6 @@ class EarlyStopping:
             'epoch': epoch,
             'model_state_dict': self.model.state_dict(),
             'head_state_dict': self.head.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
             'early_stopping_state_dict': {
                 'acc': self.best_acc,
                 'patience_count': self.count,
@@ -93,7 +90,7 @@ class EarlyStopping:
             print(f'No Improvement. Count: {self.count}/{self.patience}\n')
             
             
-def load_checkpoint(path, model, head=None, optimizer=None,
+def load_checkpoint(path, model, head=None,
                     early_stopping=None, device='gpu'):
     
     statedict = torch.load(path, weights_only=False, map_location=device)
@@ -101,7 +98,6 @@ def load_checkpoint(path, model, head=None, optimizer=None,
     
     epoch = statedict.get('epoch')
     head.load_state_dict(statedict['head_state_dict'])
-    optimizer.load_state_dict(statedict['optimizer_state_dict'])
     
     early_stopping_state_dict = statedict['early_stopping_state_dict']
     acc = early_stopping_state_dict.get('acc')
