@@ -1,5 +1,5 @@
 import torch
-import net
+from . import net
 
 def get_model(name, checkpoint):
     model = net.build_model(name)
