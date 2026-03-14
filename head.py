@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
-from HuyenLaoNhao.utils import l2_norm
+from .utils import l2_norm
 import numpy as np
-
 class AdaFace(nn.Module):
     def __init__(self,
                  embedding_size=512,
