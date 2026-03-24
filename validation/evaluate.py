@@ -3,19 +3,42 @@ import numpy as np
 import os
 import torch
 from tqdm import tqdm
-from ..validation import evaluate_utils
+from ..validation import evaluate_utils, l2_norm
 from ..validation_mixed.validate_IJB_BC import fuse_features_with_norm, get_features, evaluate
+from ..expert import gabor
+from ..utils import kernel_pca
+from skimage.color import rgb2gray
 
-def evaluate1(model, val_loader, device):
+def evaluate1(model, val_loader, device, expert=False):
     model.eval()
 
     all_embeddings = []
+    all_features = []
     all_labels = []
     all_datanames = []
     all_indices = []
+    
+    if expert:
+        bank = gabor.build_gabor_bank()
+        print(f'Gabor bank built with {len(bank)} filters')
+    
     with torch.no_grad():
         for images, labels, datanames, indices in tqdm(val_loader):
-
+            if expert:
+                print('Extracting Gabor features')
+                images_ = images.permute(0, 2, 3, 1)
+                grays = [rgb2gray(img) for img in images_]
+                list_responses = [gabor.apply_gabor_bank(gray, bank) for gray in grays]
+                features = []
+                for response in list_responses:
+                    images = []
+                    for entry in response:
+                        images.append(entry['magnitude'].flatten())
+                    features.append(np.concatenate(images, axis=0)) # (32, 225792)
+                features = torch.tensor(features, dtype=torch.float32)
+                all_features.append(features) # (N, 32, _)
+            
+            # MODEL EMBEDDINGS
             images, labels = images.to(device), labels.to(device)
 
             embeddings, norms = model(images)
@@ -26,16 +49,25 @@ def evaluate1(model, val_loader, device):
                 torch.stack([norms, flip_norms], 0)
             )
 
-            all_embeddings.append(embeddings.cpu())
+            all_embeddings.append(embeddings.cpu()) # (N, 32, 512)
             all_labels.append(labels.cpu())
             all_datanames.append(datanames.cpu())
             all_indices.append(indices.cpu())
 
-        embeddings = torch.cat(all_embeddings)
+        embeddings = torch.cat(all_embeddings) # (N, 512)
         labels = torch.cat(all_labels)
         datanames = torch.cat(all_datanames)
         indices = torch.cat(all_indices)
-
+        
+        if expert:
+            print('Start to apply kernel PCA on Gabor features\n')
+            print(f"Features shape before PCA: ({len(all_features)},{len(all_features[0])})")
+            kpca, all_features = kernel_pca(torch.cat(all_features, dim=0).numpy(), n_components=512) # (N, 512)
+            print(f"Features shape after PCA: {all_features.shape}\n")
+            embeddings = torch.cat([embeddings, all_features], dim=1) # (N, 1024)
+            
+            print(f"Embeddings shape after concatenating with Gabor features: {embeddings.shape}\n")
+        
         dataname_to_idx = {"agedb_30": 0, "cfp_fp": 1, "lfw": 2, "cfp_ff": 3}
         idx_to_dataname = {val: key for key, val in dataname_to_idx.items()}
 

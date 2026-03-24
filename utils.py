@@ -1,7 +1,13 @@
 import torch
 import torch.nn as nn
 import os, shutil
+from sklearn.decomposition import KernelPCA
 
+
+def kernel_pca(features, n_components=512, kernel='rbf'):
+    kpca = KernelPCA(n_components=n_components, kernel=kernel)
+    transformed_features = kpca.fit_transform(features)
+    return kpca, transformed_features
 
 def l2_norm(input, axis=1):
     norm = torch.norm(input, 2, axis,True)
