@@ -9,6 +9,9 @@ from ..validation_mixed.insightface_ijb_helper.dataloader import prepare_dataloa
 from ..validation_mixed.insightface_ijb_helper import eval_helper_identification
 from ..validation_mixed.insightface_ijb_helper import eval_helper as eval_helper_verification
 
+from ..expert import gabor
+from ..utils import kernel_pca
+
 import warnings
 warnings.filterwarnings("ignore")
 import torch
@@ -44,7 +47,7 @@ def fuse_features_with_norm(stacked_embeddings, stacked_norms):
 
     return fused, fused_norm
 
-def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test, device):
+def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test, device, expert=False):
     img_list = open(landmark_list_path)
     # img_aligner = ImageAligner(image_size=(112, 112))
 
@@ -70,10 +73,32 @@ def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test,
     model.eval()
     features = []
     norms = []
+    
+    all_features = []
+    if expert:
+        bank = gabor.build_gabor_bank()
+        print(f'Gabor bank built with {len(bank)} filters')
+    
     with torch.no_grad():
         for images, idx in tqdm(dataloader):
-
-            feature = model(images.to(device))
+            
+            # GABOR FILTERS APPLIED HERE
+            if expert:
+                images_ = images.permute(0, 2, 3, 1)
+                grays = [rgb2gray(img) for img in images_]
+                list_responses = [gabor.apply_gabor_bank(gray, bank) for gray in grays]
+                expert_features = []
+                for response in list_responses:
+                    images_ = []
+                    for entry in response:
+                        images_.append(entry['magnitude'].flatten())
+                    expert_features.append(np.concatenate(images_, axis=0)) # (32, 225792)
+                expert_features = torch.tensor(expert_features, dtype=torch.float32)
+                all_features.append(expert_features.numpy()) # (N, 32, _)
+            
+            
+            # GABOR FILTERS APPLIED HERE
+            feature = model(images.to(device)) # (32, 512)
             if isinstance(feature, tuple):
                 feature, norm = feature
             else:
@@ -97,11 +122,26 @@ def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test,
                 features.append(fused_feature.cpu().numpy())
                 norms.append(fused_norm.cpu().numpy())
             else:
-                features.append(feature.cpu().numpy())
+                features.append(feature.cpu().numpy()) # (N, 32, 512)
                 norms.append(norm.cpu().numpy())
-
-    features = np.concatenate(features, axis=0)
-    img_feats = np.array(features).astype(np.float32)
+    
+    # Apply Kernel PCA
+    if expert:
+        print('Start to apply kernel PCA on Gabor features\n')
+        print(f"Features shape before PCA: ({len(all_features)},{len(all_features[0][0])})")
+        kpca, all_features = kernel_pca(torch.cat(all_features, dim=0).numpy(), n_components=512) # (N, 512)
+        print(f"Features shape after PCA: {all_features.shape}\n")
+        # features: (N, 32, 512) -> List numpy
+        # all_features: (N, 32, 512) -> List numpy
+        combined_features = np.concatenate([features, all_features], axis=2) # (N, 32, 1024)
+        img_feats = np.concatenate(list(combined_features), axis=0).astype(np.float32) # (N, 1024)
+        
+        print(f"Embeddings shape after concatenating with Gabor features: {embeddings.shape}\n")
+    else:
+        features = np.concatenate(features, axis=0) # (N, 512)
+        img_feats = np.array(features).astype(np.float32)
+        
+       
     faceness_scores = np.array(faceness_scores).astype(np.float32)
     norms = np.concatenate(norms, axis=0)
 
