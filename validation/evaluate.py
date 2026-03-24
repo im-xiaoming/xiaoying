@@ -66,7 +66,7 @@ def evaluate1(model, val_loader, device, expert=False, counter=-1):
         
         if expert:
             print('Start to apply kernel PCA on Gabor features\n')
-            print(f"Features shape before PCA: ({len(all_features)},{len(all_features[0])})")
+            print(f"Features shape before PCA: ({len(all_features)},{len(all_features[0][0])})")
             kpca, all_features = kernel_pca(torch.cat(all_features, dim=0).numpy(), n_components=512) # (N, 512)
             print(f"Features shape after PCA: {all_features.shape}\n")
             embeddings = torch.cat([embeddings, all_features], dim=1) # (N, 1024)
