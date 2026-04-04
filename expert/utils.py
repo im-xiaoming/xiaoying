@@ -39,12 +39,16 @@ def get_expert_features(val_loader):
             
         m, n = pca_features.shape
         if n != 512:
+            if isinstance(pca_features, np.ndarray):
+                pca_features = torch.from_numpy(pca_features)
             pca_features = torch.cat([pca_features, torch.zeros(m, 512 - n)], dim=-1)
         all_features.extend(pca_features)
 
     pool.close()
     pool.join()
 
+    F = all_features
+    
     return torch.tensor(all_features)
 
 

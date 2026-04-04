@@ -6,47 +6,6 @@ from tqdm import tqdm
 from .import evaluate_utils
 from ..validation_mixed.validate_IJB_BC import fuse_features_with_norm, get_features, evaluate
 from ..expert.utils import combined_features
-
-def create_data_features(model, val_loader, device, path):
-    model.eval()
-    
-    all_embeddings = []
-    all_features = []
-    all_labels = []
-    all_datanames = []
-    all_indices = []
-    
-    with torch.no_grad():
-        for images, labels, datanames, indices in tqdm(val_loader):
-            images, labels = images.to(device), labels.to(device)
-
-            embeddings, norms = model(images)
-
-            flip_embeddings, flip_norms = model(torch.flip(images, dims=[3]))
-            embeddings, norms = fuse_features_with_norm(
-                torch.stack([embeddings, flip_embeddings], 0),
-                torch.stack([norms, flip_norms], 0)
-            )
-
-            all_embeddings.append(embeddings.cpu()) # (N, 32, 512)
-            all_labels.append(labels.cpu())
-            all_datanames.append(datanames.cpu())
-            all_indices.append(indices.cpu())
-            
-        embeddings = torch.cat(all_embeddings) # (N, 512)
-        labels = torch.cat(all_labels)
-        datanames = torch.cat(all_datanames)
-        indices = torch.cat(all_indices)
-        
-    data = {
-        'embeddings': embeddings,
-        'labels': labels,
-        'datanames': datanames,
-        'indices': indices
-    }
-    torch.save(data, path)
-    return data, path
-        
         
 def evaluate1(model, val_loader, device, path, expert_path):
     model.eval()

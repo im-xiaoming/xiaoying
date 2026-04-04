@@ -56,7 +56,7 @@ def fuse_features_with_norm(stacked_embeddings, stacked_norms):
 
 
 def create_exert_features(data_loader):
-    all_features = get_expert_features(dataloader)
+    all_features = get_expert_features(data_loader)
     torch.save(all_features, EXPERT_FEATS_PATH)
 
 
@@ -89,16 +89,18 @@ def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test,
     
     # GABOR FILTER
     if USE_EXPERT:
-        if not os.path.exists(os.path.join(EXPERT_FEATS_PATH)):
+        if not os.path.exists(EXPERT_FEATS_PATH):
+            print("Creating Gabor features...")
             create_exert_features(dataloader)
             print("Done created Gabor features!")
             return
         else:
-            all_features = torch.load(FEATS_PATH)
+            all_features = torch.load(EXPERT_FEATS_PATH, weights_only=True)
             print("Done loaded Gabor features!")
     
     # INFERENCE
     if not os.path.exists(FEATS_PATH):
+        print("Create features...")
         with torch.no_grad():
             for images, idx in tqdm(dataloader):
                 feature = model(images.to(device))
@@ -139,7 +141,7 @@ def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test,
         return  
             
     else:
-        data_dict = torch.load(FEATS_PATH)
+        data_dict = torch.load(FEATS_PATH, weights_only=False)
         img_feats = data_dict['features']
         norms = data_dict['norms']
         
