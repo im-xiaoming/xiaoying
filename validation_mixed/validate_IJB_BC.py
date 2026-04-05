@@ -9,7 +9,7 @@ from ..validation_mixed.insightface_ijb_helper.dataloader import prepare_dataloa
 from ..validation_mixed.insightface_ijb_helper import eval_helper_identification
 from ..validation_mixed.insightface_ijb_helper import eval_helper as eval_helper_verification
 
-from ..expert import gabor
+from ..expert import gabor, hog
 from ..expert.utils import get_expert_features, combined_features
 from ..utils import kernel_pca
 
@@ -21,7 +21,8 @@ import pandas as pd
 
 
 
-USE_EXPERT = False
+USE_GABOR_EXPERT = False
+USE_HOG_EXPERT = False
 FEATS_PATH = None
 EXPERT_FEATS_PATH = None
 
@@ -55,8 +56,12 @@ def fuse_features_with_norm(stacked_embeddings, stacked_norms):
     return fused, fused_norm
 
 
-def create_exert_features(data_loader):
+def create_gabor_features(data_loader):
     all_features = get_expert_features(data_loader)
+    torch.save(all_features, EXPERT_FEATS_PATH)
+    
+def create_hog_features(data_loader):
+    all_features = hog.get_hog_features(data_loader)
     torch.save(all_features, EXPERT_FEATS_PATH)
 
 
@@ -88,15 +93,23 @@ def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test,
     norms = []
     
     # GABOR FILTER
-    if USE_EXPERT:
+    if USE_GABOR_EXPERT:
         if not os.path.exists(EXPERT_FEATS_PATH):
             print("Creating Gabor features...")
-            create_exert_features(dataloader)
+            create_gabor_features(dataloader)
             print("Done created Gabor features!")
-            return
         else:
             all_features = torch.load(EXPERT_FEATS_PATH, weights_only=True)
             print("Done loaded Gabor features!")
+            
+    elif USE_HOG_EXPERT:
+        if not os.path.exists(EXPERT_FEATS_PATH):
+            print("Creating Hog features...")
+            create_hog_features(dataloader)
+            print("Done created Hog features!")
+        else:
+            all_features = torch.load(EXPERT_FEATS_PATH, weights_only=True)
+            print("Done loaded Hog features!")
     
     # INFERENCE
     if not os.path.exists(FEATS_PATH):
@@ -138,7 +151,6 @@ def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test,
             'features': img_feats,
             'norms': norms
         }, FEATS_PATH)
-        return  
             
     else:
         data_dict = torch.load(FEATS_PATH, weights_only=False)
@@ -148,7 +160,11 @@ def infer_images(model, img_root, landmark_list_path, batch_size, use_flip_test,
         print("Load data successfully!")
     
     
-    if USE_EXPERT:
+    if USE_GABOR_EXPERT:
+        print('Combined features!')
+        img_feats = combined_features(img_feats, all_features).numpy()
+    
+    elif USE_HOG_EXPERT:
         print('Combined features!')
         img_feats = combined_features(img_feats, all_features).numpy()
     
