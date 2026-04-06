@@ -29,7 +29,7 @@ Tuy nhiên, các phương pháp này tồn tại nhiều hạn chế:
 #### 2.1.1. FaceNet: A Unified Embedding for Face Recognition and Clustering
 FaceNet (2015) là phương pháp nhận dạng khuôn mặt dựa trên học sâu, sử dụng mạng CNN huấn luyện end-to-end để ánh xạ ảnh khuôn mặt thành các vector đặc trưng (embedding) trong không gian Euclidean. Mô hình sử dụng hàm mất mát Triplet Loss để trực tiếp tối ưu hóa khoảng cách: kéo gần các cặp cùng danh tính (anchor - positive) và đẩy xa các cặp khác danh tính (anchor - negative) theo một biên xác định. Nhờ cơ chế này, việc xác thực có thể thực hiện đơn giản bằng cách so sánh khoảng cách giữa các embedding mà không cần bộ phân loại phức tạp.
 
-FaceNet chọn triplet gồm các cặp positive, negative và anchor và sau đó tối ưu hàm mất mát theo công thức sau:  
+FaceNet chọn triplet gồm các cặp positive, negative và anchor và sau đó tối ưu hàm mất mát theo công thức sau: 
 $$||f(x_{i}^{a})-f(x_{i}^{p})||_{2}^{2} + \alpha < ||f(x_{i}^{a})-f(x_{i}^{n})||_{2}^{2}$$
 Trong đó:  
 * $f(x) \in \mathbb{R}^{d}$  
