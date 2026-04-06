@@ -89,7 +89,7 @@ Cụ thể, ảnh đầu vào có thể được cắt ngẫu nhiên kết hợp
 Đầu ra của mạng CNN là vector embedding kích thước $\mathbb{R}^{512}$, biểu diễn danh tính trong không gian đặc trưng sao cho các ảnh cùng người nằm gần nhau và khác người nằm xa nhau. Để so sánh, hệ thống sử dụng độ đo cosine similarity nhằm đánh giá sự tương đồng về hướng giữa các vector, giúp ổn định hóa quá trình nhận diện. Nếu giá trị này vượt qua ngưỡng (threshold) xác định, hai ảnh được xem là thuộc cùng một danh tính (same person); ngược lại, chúng được xem là hai người khác nhau (different person).
 
 ### 3.3. Phương pháp toán học đằng sau AdaFace
-Hàm softmax được sử dụng để huấn luyện mô hình phân loại có dạng:
+Hàm softmax được sử dụng để huấn luyện mô hình phân loại có dạng:  
 $$L(x_i) = -\log \frac{\exp(W_{y_i}^T x_i + b_{y_i})}{\sum_{j=1}^c \exp(W_j^T x_j + b_j)}$$
 Trong đó, $x_i \in \mathbb{R}^d$ là vector embedding của mẫu thứ $i$; $W_j \in \mathbb{R}^d$ là vector trọng số tương ứng với lớp thứ $j$; $b_j$ là hệ số bias của lớp thứ $j$; $y_i$ là nhãn đúng của mẫu; và $c$ là tổng số lớp. Hàm mất mát này khuyến khích embedding của mẫu $x$ có độ tương đồng cao với trọng số của lớp đúng và thấp với các lớp còn lại.
 
