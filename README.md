@@ -29,18 +29,18 @@ Tuy nhiên, các phương pháp này tồn tại nhiều hạn chế:
 #### 2.1.1. FaceNet: A Unified Embedding for Face Recognition and Clustering
 FaceNet (2015) là phương pháp nhận dạng khuôn mặt dựa trên học sâu, sử dụng mạng CNN huấn luyện end-to-end để ánh xạ ảnh khuôn mặt thành các vector đặc trưng (embedding) trong không gian Euclidean. Mô hình sử dụng hàm mất mát Triplet Loss để trực tiếp tối ưu hóa khoảng cách: kéo gần các cặp cùng danh tính (anchor - positive) và đẩy xa các cặp khác danh tính (anchor - negative) theo một biên xác định. Nhờ cơ chế này, việc xác thực có thể thực hiện đơn giản bằng cách so sánh khoảng cách giữa các embedding mà không cần bộ phân loại phức tạp.
 
-FaceNet chọn triplet gồm các cặp positive, negative và anchor và sau đó tối ưu hàm mất mát theo công thức sau:
+FaceNet chọn triplet gồm các cặp positive, negative và anchor và sau đó tối ưu hàm mất mát theo công thức sau:  
 $$||f(x_{i}^{a})-f(x_{i}^{p})||_{2}^{2} + \alpha < ||f(x_{i}^{a})-f(x_{i}^{n})||_{2}^{2}$$
-Trong đó:
-* $f(x) \in \mathbb{R}^{d}$
-* $x$ là ảnh đầu vào
+Trong đó:  
+* $f(x) \in \mathbb{R}^{d}$  
+* $x$ là ảnh đầu vào  
 
 Tuy nhiên, số lượng triplet là rất lớn khi dữ liệu lớn, cụ thể số triplet tăng theo $O(N^{3})$. Ngoài ra việc chọn easy triplet khiến cho $loss=0$ hậu quả mô hình không học gì. Ngược lại việc chọn hard triplet làm cho mô hình dễ nhiễu, gradient không ổn định. Việc thiết kế Online / offline mining hay Semi-hard triplet đòi hỏi phải bỏ công sức training khó, dễ fail nếu mining không tốt.
 
 #### 2.1.2. ArcFace: Additive Angular Margin Loss for Deep Face Recognition
 ArcFace là một phương pháp học đặc trưng cho nhận dạng khuôn mặt được đề xuất năm 2019 (Deng et al.), nổi bật với hàm mất mát Additive Angular Margin Loss nhằm tăng cường khả năng phân biệt giữa các danh tính.
 
-Về ý tưởng cốt lõi, ArcFace chuẩn hóa vector đặc trưng và trọng số lớp lên hypersphere, sau đó áp đặt một biên góc (angular margin) trực tiếp lên góc giữa embedding và trọng số lớp tương ứng. Điều này buộc các mẫu cùng danh tính phải gom chặt hơn theo góc, đồng thời đẩy các danh tính khác xa nhau hơn trên không gian góc. Công thức của ArcFace được triển khai như sau:
+Về ý tưởng cốt lõi, ArcFace chuẩn hóa vector đặc trưng và trọng số lớp lên hypersphere, sau đó áp đặt một biên góc (angular margin) trực tiếp lên góc giữa embedding và trọng số lớp tương ứng. Điều này buộc các mẫu cùng danh tính phải gom chặt hơn theo góc, đồng thời đẩy các danh tính khác xa nhau hơn trên không gian góc. Công thức của ArcFace được triển khai như sau:  
 $$L = -\log \frac{e^{s \cos(\theta_{y_i} + m)}}{e^{s \cos(\theta_{y_i} + m)} + \sum_{j=1, j \neq y_i}^{N} e^{s \cos \theta_j}}$$
 
 Tuy nhiên các bộ dữ liệu huấn luyện thường được thu thập từ internet, không thể tránh khỏi các ảnh có chất lượng thấp ảnh hưởng tới mô hình. Giải việc dữ liệu chất lượng thấp là điều các phương pháp trên vẫn chưa làm được.
