@@ -34,7 +34,7 @@ $$||f(x_{i}^{a})-f(x_{i}^{p})||_{2}^{2} + \alpha < ||f(x_{i}^{a})-f(x_{i}^{n})||
 Trong đó:  
 * $f(x) \in \mathbb{R}^{d}$  
 * $x$ là ảnh đầu vào  
-
+ 
 Tuy nhiên, số lượng triplet là rất lớn khi dữ liệu lớn, cụ thể số triplet tăng theo $O(N^{3})$. Ngoài ra việc chọn easy triplet khiến cho $loss=0$ hậu quả mô hình không học gì. Ngược lại việc chọn hard triplet làm cho mô hình dễ nhiễu, gradient không ổn định. Việc thiết kế Online / offline mining hay Semi-hard triplet đòi hỏi phải bỏ công sức training khó, dễ fail nếu mining không tốt.
 
 #### 2.1.2. ArcFace: Additive Angular Margin Loss for Deep Face Recognition
