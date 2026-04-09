@@ -127,11 +127,11 @@ Các nhà nghiên cứu trong bài báo AdaFace chỉ ra rằng chất lượng 
 
 Sau khi đi qua mạng nơ-ron tích chập, vector embedding $x_j$ có độ lớn phụ thuộc vào số lượng unit đầu ra của mạng, dẫn đến sự không ổn định trong quá trình huấn luyện. Để khắc phục vấn đề này, AdaFace giới thiệu hai tham số thống kê $\mu_z$ và $\sigma_z$, lần lượt là kỳ vọng và độ lệch chuẩn của chuẩn L2 của embedding. Giá trị $\hat{z}_i$ phản ánh chất lượng tương đối của mẫu và được sử dụng để điều chỉnh quá trình học trong hàm loss. Việc giới hạn giá trị trong khoảng $[-1, 1]$ giúp loại bỏ các giá trị ngoại lai. Một tham số điều chỉnh $h$ được đưa vào nhằm nén thêm các giá trị còn lại về miền $[-1, 1]$. Quá trình chuẩn hóa này đóng vai trò quan trọng trong việc ổn định quá trình huấn luyện, tránh hiện tượng gradient bùng nổ.
 
-Để khắc phục vấn đề khi kích thước batch nhỏ, AdaFace sử dụng kỹ thuật Exponential Moving Average (EMA) nhằm làm mượt và ổn định các tham số thống kê. Cụ thể, giá trị trung bình mu_z được cập nhật theo công thức: $mu_z = alpha * mu_z^(k) + (1 - alpha) * mu_z^(k-1)$.
+Để khắc phục vấn đề khi kích thước batch nhỏ, AdaFace sử dụng kỹ thuật Exponential Moving Average (EMA) nhằm làm mượt và ổn định các tham số thống kê. Cụ thể, giá trị trung bình mu_z được cập nhật theo công thức: $mu_z = \alpha * mu_z^{k} + (1 - alpha) * mu_z^{k-1}$.
 
-Dựa trên chất lượng ảnh được ước lượng thông qua `ẑ_i`, AdaFace điều chỉnh mức độ học của mô hình theo từng mẫu. Hàm logit được điều chỉnh như sau:
+Dựa trên chất lượng ảnh được ước lượng thông qua $ẑ^i$, AdaFace điều chỉnh mức độ học của mô hình theo từng mẫu. Hàm logit được điều chỉnh như sau:
 
-Để khắc phục vấn đề khi kích thước batch nhỏ, AdaFace sử dụng kỹ thuật Exponential Moving Average (EMA) nhằm làm mượt và ổn định các tham số thống kê. Cụ thể, giá trị trung bình mu_z được cập nhật theo công thức: $mu_z = alpha * mu_z^(k) + (1 - alpha) * mu_z^(k-1)$.
+Để khắc phục vấn đề khi kích thước batch nhỏ, AdaFace sử dụng kỹ thuật Exponential Moving Average (EMA) nhằm làm mượt và ổn định các tham số thống kê. Cụ thể, giá trị trung bình mu_z được cập nhật theo công thức: $mu_z = alpha * mu_z^{k} + (1 - alpha) * mu_z^{k-1}$.
 
 Dựa trên chất lượng ảnh được ước lượng thông qua $\hat{z}_i$, AdaFace điều chỉnh mức độ học của mô hình theo từng mẫu. Hàm logit được điều chỉnh như sau:
 
