@@ -135,7 +135,7 @@ Dựa trên chất lượng ảnh được ước lượng thông qua $ẑ^i$, A
 
 Dựa trên chất lượng ảnh được ước lượng thông qua $\hat{z}_i$, AdaFace điều chỉnh mức độ học của mô hình theo từng mẫu. Hàm logit được điều chỉnh như sau:
 
-$$L(x_i) = -\log \frac{\exp(f(\theta_{y_i}, \hat{z}_i))}{\exp(f(\theta_{y_i}, \hat{z}_i)) + \sum_{j \neq y_i}^c \exp(s \cos \theta_j)}$$
+$$L(x_i) = -\log \frac{\exp(f(\theta_{y_i}, \hat{z}_i))}{\exp(f(\theta_{y_i}, \hat{z}_i)) + \sum_{j \neq y_i}^c \exp(s \cos \dot \theta_j)}$$
 
 $$f(\theta_{y_i}, \hat{z}_i) = s \cdot (\cos(\theta_{y_i} + g_{angle}) - g_{add})$$
 
