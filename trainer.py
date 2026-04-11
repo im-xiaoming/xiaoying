@@ -54,8 +54,8 @@ class Trainer:
                     "lr": self.optimizer.param_groups[0]["lr"]
                 })
                 
-                # save checkpoint
-                self.checkpoint.save(f'{self.model_name}_checkpoint_{it}.pth', it)
+            # save checkpoint
+            self.checkpoint.save(f'{self.model_name}_checkpoint_{it}.pth', it)
         
         
     

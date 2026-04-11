@@ -37,12 +37,12 @@ class CheckPoint:
         model_statedict = self.model.state_dict()
         head_statedict = self.head.state_dict()
         optimizer_statedict = self.optimizer.state_dict()
-        torch.save(file, {
+        torch.save({
             'model_statedict': model_statedict,
             'head_statedict': head_statedict,
             'optimizer_statedict': optimizer_statedict,
             'epoch': epoch
-        })
+        }, file)
         print("\nSave checkpoint successfully!\n")
             
         
