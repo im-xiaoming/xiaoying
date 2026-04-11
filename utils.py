@@ -60,7 +60,7 @@ def load_checkpoint(file, model, head, optimizer, device='gpu'):
         
         return epoch
     
-    return 0
+    return 1
 
 
 def split_parameters(module):
