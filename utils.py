@@ -34,17 +34,16 @@ class CheckPoint:
         self.optimizer = optimizer
         
     def save(self, file, epoch):
-        if os.path.isfile(file):
-            model_statedict = self.model.state_dict()
-            head_statedict = self.head.state_dict()
-            optimizer_statedict = self.optimizer.state_dict()
-            torch.save(file, {
-                'model_statedict': model_statedict,
-                'head_statedict': head_statedict,
-                'optimizer_statedict': optimizer_statedict,
-                'epoch': epoch
-            })
-            print("\nSave checkpoint successfully!\n")
+        model_statedict = self.model.state_dict()
+        head_statedict = self.head.state_dict()
+        optimizer_statedict = self.optimizer.state_dict()
+        torch.save(file, {
+            'model_statedict': model_statedict,
+            'head_statedict': head_statedict,
+            'optimizer_statedict': optimizer_statedict,
+            'epoch': epoch
+        })
+        print("\nSave checkpoint successfully!\n")
             
         
 def load_checkpoint(file, model, head, optimizer, device='gpu'):
