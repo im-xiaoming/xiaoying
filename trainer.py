@@ -1,6 +1,6 @@
 import torch
 from .utils import load_checkpoint, CheckPoint
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
 from tqdm import tqdm
 import numpy as np
 
