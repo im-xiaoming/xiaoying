@@ -74,7 +74,24 @@ def split_parameters(module):
     return params_decay, params_no_decay
 
 
+def split_parameters_for_vit(model):
+    decay = []
+    no_decay = []
 
+    for name, param in model.named_parameters():
+        if not param.requires_grad:
+            continue
+
+        if (
+            len(param.shape) == 1
+            or name.endswith(".bias")
+            or "pos_embed" in name
+        ):
+            no_decay.append(param)
+        else:
+            decay.append(param)
+
+    return decay, no_decay
 
 
 
@@ -82,6 +99,7 @@ from .data import CustomImageFolderDataset
 from torch.utils.data import DataLoader
 from .head import AdaFace
 from . import net
+from .ViT import load_models
 
 def get_loader(data_path, transforms, batch_size, shuffle=False,
                low_res_augmentation_prob=0.0, crop_augmentation_prob=0.0, photometric_augmentation_prob=0.0):
@@ -103,7 +121,10 @@ def get_loader(data_path, transforms, batch_size, shuffle=False,
     return loader
 
 def get_model(model_name, device):
-    model = net.build_model(model_name)
+    if 'ir' in model_name:
+        model = net.build_model(model_name)
+    else:
+        model = load_models()
     model.to(device)
     return model
 
@@ -114,15 +135,22 @@ def get_head(device, embedding_size=512, classnum=8631, m=0.4, h=0.333, s=64, t_
     return head
 
 
-def get_optimizer(model, head, lr):
-    paras_wo_bn, paras_only_bn = split_parameters(model)
+def get_optimizer(model, model_name, head, lr, momentum=0.9):
+    if 'ir' in model_name:
+        paras_wo_bn, paras_only_bn = split_parameters(model)
+    else:
+        paras_wo_bn, paras_only_bn = split_parameters_for_vit(model)
 
     optimizer = torch.optim.SGD([{
                 'params': paras_wo_bn + [head.kernel],
                 'weight_decay': 1e-4
             }, {
                 'params': paras_only_bn
-            }], lr=lr, momentum=0.9)
+            }], lr=lr, momentum=momentum)
     
     return optimizer
 
+
+def set_lr(optimizer, lr):
+    optimizer.param_groups[0]['lr'] = lr
+    optimizer.param_groups[1]['lr'] = lr

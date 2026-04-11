@@ -4,6 +4,7 @@ import shutil
 import os
 import torch
 import sys
+import torch.nn as nn
 
 # helpfer function to download huggingface repo and use model
 def download(repo_id, path, HF_TOKEN=None):
@@ -39,8 +40,22 @@ def load_model_by_repo_id(repo_id, save_path, HF_TOKEN=None, force_download=Fals
     return load_model_from_local_path(save_path, HF_TOKEN)
 
 
+
+class ViT(nn.Module):
+    def __init__(self, model):
+        super(ViT, self).__init__()
+        self.model = model
+        
+    def forward(self, x):
+        x = self.model(x)
+        norm = torch.norm(x, 2, 1, True)
+        output = torch.div(x, norm)
+        return output, norm
+    
+
 def load_vit_base(HF_TOKEN=None):
     path = os.path.expanduser('~/.cvlface_cache/minchul/cvlface_adaface_vit_base_webface4m')
     repo_id = 'minchul/cvlface_adaface_vit_base_webface4m'
     model = load_model_by_repo_id(repo_id, path, HF_TOKEN)
-    return model
+    vit = ViT(model)
+    return vit
