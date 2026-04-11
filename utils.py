@@ -135,19 +135,27 @@ def get_head(device, embedding_size=512, classnum=8631, m=0.4, h=0.333, s=64, t_
     return head
 
 
-def get_optimizer(model, model_name, head, lr, momentum=0.9):
+def get_optimizer(model, model_name, head, lr, momentum=0.9, opt_type='sgd'):
     if 'ir' in model_name:
         paras_wo_bn, paras_only_bn = split_parameters(model)
     else:
         paras_wo_bn, paras_only_bn = split_parameters_for_vit(model)
 
-    optimizer = torch.optim.SGD([{
-                'params': paras_wo_bn + [head.kernel],
-                'weight_decay': 1e-4
-            }, {
-                'params': paras_only_bn
-            }], lr=lr, momentum=momentum)
-    
+    if opt_type == 'sgd':
+        optimizer = torch.optim.SGD([{
+                    'params': paras_wo_bn + [head.kernel],
+                    'weight_decay': 1e-4
+                }, {
+                    'params': paras_only_bn
+                }], lr=lr, momentum=momentum)
+    else:
+        optimizer = torch.optim.AdamW([{
+                    'params': paras_wo_bn + [head.kernel],
+                    'weight_decay': 1e-4
+                }, {
+                    'params': paras_only_bn
+                }], lr=lr, betas=(0.9, 0.999))
+        
     return optimizer
 
 
