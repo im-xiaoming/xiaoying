@@ -46,9 +46,9 @@ class CheckPoint:
         print("\nSave checkpoint successfully!\n")
             
         
-def load_checkpoint(file, model, head, optimizer, device='gpu'):
+def load_checkpoint(file, model, head, optimizer):
     if os.path.isfile(file):
-        statedict = torch.load(file, weights_only=False, map_location=device)
+        statedict = torch.load(file)
     
         model.load_state_dict(statedict['model_statedict'])
         head.load_state_dict(statedict['head_statedict'])
