@@ -57,7 +57,7 @@ def load_checkpoint(file, model, head, optimizer):
 
         print(f"Successfully load model statedict with epoch {epoch}.\n")
         
-        return epoch
+        return epoch + 1
     
     return 1
 
