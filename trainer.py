@@ -34,7 +34,7 @@ class Trainer:
                 
                 images, labels = images.to(self.device), labels.to(self.device)
                 
-                with torch.autocast():
+                with torch.autocast(device_type=self.device.type, dtype=torch.float16):
                     embedings, norm = self.model(images)
                     cos_theta = self.head(embedings, norm, labels)
                     loss = self.criterion(cos_theta, labels)
