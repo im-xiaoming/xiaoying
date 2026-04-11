@@ -32,7 +32,9 @@ class Trainer:
                 
                 self.optimizer.zero_grad()
                 
-                with torch.autocast(device_type=self.device.type, dtype=torch.float16):
+                images, labels = images.to(self.device), labels.to(self.device)
+                
+                with torch.autocast():
                     embedings, norm = self.model(images)
                     cos_theta = self.head(embedings, norm, labels)
                     loss = self.criterion(cos_theta, labels)
