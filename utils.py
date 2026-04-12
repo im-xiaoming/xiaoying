@@ -163,3 +163,22 @@ def get_optimizer(model, model_name, head, lr, momentum=0.9, opt_type='sgd'):
 def set_lr(optimizer, lr):
     optimizer.param_groups[0]['lr'] = lr
     optimizer.param_groups[1]['lr'] = lr
+    
+    
+    
+def combine_data(root, target_1, target_2, suffix_1, suffix_2):
+    def copy(root, target, suffix):
+        print("Count root folders: ", len(os.listdir(root)))
+        for folder in os.listdir(target):
+            if os.path.exists(os.path.join(root, folder)):
+                shutil.move(
+                    os.path.join(target, folder),
+                    os.path.join(root, folder + suffix)
+                )
+            else:
+                shutil.move(os.path.join(target, folder), os.path.join(root))
+
+        print("Count root folders after moving: ", len(os.listdir(root)))
+    
+    copy(root, target_1, suffix_1)
+    copy(root, target_2, suffix_2)
