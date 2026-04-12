@@ -182,3 +182,9 @@ def combine_data(root, target_1, target_2, suffix_1, suffix_2):
     
     copy(root, target_1, suffix_1)
     copy(root, target_2, suffix_2)
+    
+    
+def free_memory():
+    import gc
+    gc.collect()
+    torch.cuda.empty_cache()
