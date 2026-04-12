@@ -44,6 +44,7 @@ class CheckPoint:
             'epoch': epoch
         }, file)
         print("\nSave checkpoint successfully!\n")
+        return file
             
         
 def load_checkpoint(file, model, head, optimizer):

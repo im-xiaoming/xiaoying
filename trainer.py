@@ -3,6 +3,8 @@ from .utils import load_checkpoint, CheckPoint
 from torch.amp import autocast, GradScaler
 from tqdm import tqdm
 import numpy as np
+import shutil
+import os
 
 class Trainer:
     def __init__(self, dataloader, model, model_name, head, optimizer, criterion, device, epochs):
@@ -23,7 +25,7 @@ class Trainer:
         self.epoch = load_checkpoint(file, self.model, self.head, self.optimizer)
         
         
-    def train(self):
+    def train(self, save_dir=None):
         self.model.train()
         scaler = GradScaler()
         train_losses = []
@@ -55,7 +57,9 @@ class Trainer:
                 })
                 
             # save checkpoint
-            self.checkpoint.save(f'{self.model_name}_checkpoint_{it}.pth', it)
+            file = self.checkpoint.save(f'{self.model_name}_checkpoint_{it}.pth', it)
+            if save_dir:
+                shutil.move(file, os.path.join(save_dir))
         
         
     
