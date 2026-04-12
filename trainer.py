@@ -7,7 +7,7 @@ import shutil
 import os
 
 class Trainer:
-    def __init__(self, dataloader, model, model_name, head, optimizer, criterion, device, epochs):
+    def __init__(self, dataloader, model, model_name, head, optimizer, criterion, device, epochs, gradient_accumulation_step=0):
         self.dataloader = dataloader
         self.model = model
         self.model_name = model_name
@@ -17,6 +17,7 @@ class Trainer:
         self.device = device
         self.epoch = 0
         self.epochs = epochs
+        self.gradient_accumulation_step = gradient_accumulation_step
         
         self.checkpoint = CheckPoint(self.model, self.head, self.optimizer)
         
@@ -29,13 +30,17 @@ class Trainer:
         self.model.train()
         scaler = GradScaler()
         train_losses = []
+        count = 0
         
         for it in range(self.epoch, self.epochs + 1):
             
             pbar = tqdm(self.dataloader, desc=f"Epoch {it}/{self.epochs}")
             for images, labels in pbar:
                 
-                self.optimizer.zero_grad()
+                count += 1
+                if count >= self.gradient_accumulation_step:
+                    self.optimizer.zero_grad()
+                    count = 0
                 
                 images, labels = images.to(self.device), labels.to(self.device)
                 
