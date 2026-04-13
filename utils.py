@@ -162,10 +162,12 @@ def load_weight(model, checkpoint):
 
         model.load_state_dict(new_state_dict, strict=False)
         
+        print("Load with .ckpt!")
         
     except:
         
         model.load_state_dict(statedict)
+        print("Load with .pth!")
         
 
 
