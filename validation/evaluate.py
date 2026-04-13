@@ -7,7 +7,7 @@ from .import evaluate_utils
 from ..validation_mixed.validate_IJB_BC import fuse_features_with_norm, get_features, evaluate
 from ..expert.utils import combined_features
         
-def evaluate1(model, val_loader, device, path, expert_path):
+def evaluate1(model, val_loader, device, path=None, expert_path=None):
     model.eval()
 
     all_embeddings = []

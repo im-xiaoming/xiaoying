@@ -9,6 +9,7 @@ def kernel_pca(features, n_components=512, kernel='rbf'):
     transformed_features = kpca.fit_transform(features)
     return kpca, transformed_features
 
+
 def l2_norm(input, axis=1):
     norm = torch.norm(input, 2, axis,True)
     output = torch.div(input, norm)
@@ -101,8 +102,9 @@ from torch.utils.data import DataLoader
 from .head import AdaFace
 from . import net
 from .ViT import load_models
+from .data import val_dataset
 
-def get_loader(data_path, transforms, batch_size, shuffle=False,
+def get_train_loader(data_path, transforms, batch_size, shuffle=False,
                low_res_augmentation_prob=0.0, crop_augmentation_prob=0.0, photometric_augmentation_prob=0.0):
     dataset = CustomImageFolderDataset(data_path,
                                         transform=transforms,
@@ -121,11 +123,26 @@ def get_loader(data_path, transforms, batch_size, shuffle=False,
     )
     return loader
 
+
+def get_val_loader(data_path, batch_size=512, num_pro=4):
+    val_ds = val_dataset(data_root=data_path)
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False,
+                                num_workers=num_pro, pin_memory=True)
+    
+    return val_loader
+
+
 def get_model(model_name, device):
-    if 'ir' in model_name:
-        model = net.build_model(model_name)
-    else:
+    """
+    model_name must be included "ir" or "vit"
+    """
+    if 'ir' in model_name.lower():
+        model = net.build_model(model_name.lower())
+    elif 'vit' in model_name.lower():
         model = load_models()
+    else:
+        raise ValueError("model_name is invalid.")
+    
     model.to(device)
     return model
 
@@ -137,25 +154,35 @@ def get_head(device, embedding_size=512, classnum=8631, m=0.4, h=0.333, s=64, t_
 
 
 def get_optimizer(model, model_name, head, lr, momentum=0.9, opt_type='sgd'):
-    if 'ir' in model_name:
+    
+    """
+    model_name must be included "ir" or "vit".
+    opt_type must be "sgd" or "adamw"
+    """
+    
+    if 'ir' in model_name.lower():
         paras_wo_bn, paras_only_bn = split_parameters(model)
-    else:
+    elif 'vit' in model_name.lower():
         paras_wo_bn, paras_only_bn = split_parameters_for_vit(model)
+    else:
+        raise ValueError("model_name is invalid.")
 
-    if opt_type == 'sgd':
+    if opt_type.lower() == 'sgd':
         optimizer = torch.optim.SGD([{
                     'params': paras_wo_bn + [head.kernel],
                     'weight_decay': 1e-4
                 }, {
                     'params': paras_only_bn
                 }], lr=lr, momentum=momentum)
-    else:
+    elif opt_type.lower() == 'adamw':
         optimizer = torch.optim.AdamW([{
                     'params': paras_wo_bn + [head.kernel],
                     'weight_decay': 1e-4
                 }, {
                     'params': paras_only_bn
                 }], lr=lr, betas=(0.9, 0.999))
+    else:
+        raise ValueError("opt_type must be 'sgd' or 'adamw'")
         
     return optimizer
 
@@ -185,6 +212,27 @@ def combine_data(root, target_1, target_2, suffix_1, suffix_2):
     
     
 def free_memory():
+    """
+    Free memory
+    """
     import gc
     gc.collect()
     torch.cuda.empty_cache()
+    
+# git clone https://github.com/im-xiaoming/firework.git
+from ..firework.loss import TaylorCrossEntropyLoss
+
+def get_criterion(ctype='softmax'):
+    """"
+    Get Criterion
+        type: strs, default: softmax; option: ["softmax", "taylor_softmax"]
+    Returns:
+        nn.Module: criterion
+    """
+    if ctype.lower() == "softmax":
+        return nn.CrossEntropyLoss()
+    elif ctype.lower() == "taylor_softmax":
+        return TaylorCrossEntropyLoss()
+    else:
+        raise ValueError("type must be 'softmax' or 'taylor_softmax'")
+    
