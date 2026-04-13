@@ -77,7 +77,7 @@ class Trainer:
                 
                 # update tqdm
                 pbar.set_postfix({
-                    "loss": f"{train_losses[-1]:.4f}",
+                    # "loss": f"{train_losses[-1]:.4f}",
                     "mean loss": f"{np.mean(train_losses):.4f}",
                     "lr": self.optimizer.param_groups[0]["lr"]
                 })
