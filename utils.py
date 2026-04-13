@@ -147,6 +147,28 @@ def get_model(model_name, device):
     return model
 
 
+def load_weight(model, checkpoint):
+    statedict = torch.load(checkpoint, weights_only=True)
+    
+    try:
+        statedict = statedict['state_dict']
+        
+        new_state_dict = {}
+
+        for k, v in statedict.items():
+            if k.startswith("model."):
+                new_key = k[len("model."):]
+                new_state_dict[new_key] = v
+
+        model.load_state_dict(new_state_dict, strict=False)
+        
+        
+    except:
+        
+        model.load_state_dict(statedict)
+        
+
+
 def get_head(device, embedding_size=512, classnum=8631, m=0.4, h=0.333, s=64, t_alpha=0.99):
     head = AdaFace(embedding_size=embedding_size, classnum=classnum, m=m, h=h, s=s, t_alpha=t_alpha)
     head.to(device)
