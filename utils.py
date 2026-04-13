@@ -220,7 +220,7 @@ def free_memory():
     torch.cuda.empty_cache()
     
 # git clone https://github.com/im-xiaoming/firework.git
-from ..firework.loss import TaylorCrossEntropyLoss
+from firework.loss import TaylorCrossEntropyLoss
 
 def get_criterion(ctype='softmax'):
     """"
