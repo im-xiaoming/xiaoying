@@ -47,7 +47,7 @@ class Trainer:
         self.model.train()
         
         scaler = GradScaler()
-        train_losses = np.zeros(self.epochs)
+        train_losses = []
         
         grad_count = 0
         epoch_count = 0
@@ -69,7 +69,7 @@ class Trainer:
                     cos_theta = self.head(embedings, norm, labels)
                     loss = self.criterion(cos_theta, labels)
                     
-                train_losses[it - 1] = loss.item()
+                train_losses.append(loss.item())
                     
                 scaler.scale(loss).backward()
                 scaler.step(self.optimizer)
@@ -85,6 +85,8 @@ class Trainer:
             # save checkpoint
             file = self.checkpoint.save(f'{self.model_name}_checkpoint_{it}.pth', it)
             if save_dir:
+                if os.path.exists(os.path.join(save_dir, file)):
+                    os.remove(os.path.join(save_dir, file))
                 shutil.move(file, os.path.join(save_dir))
             
             # evaluate
