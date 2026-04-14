@@ -93,19 +93,18 @@ class Trainer:
             epoch_count += 1
             if epoch_count >= self.eval_per_epoch:
                 if len(metrics) > 0: 
-                    self._eval(eval_loader, metrics)
+                    eval(eval_loader, self.model, metrics, self.device)
                 epoch_count = 0
-                
-    
-    def _eval(self, eval_loader, metrics=[{}]):
-        self.model.eval()
-        
-        assert eval_loader != None
-        
-        for metric in metrics:
-            if metric.get('metric_name').lower() == 'accuracy':
-                metric.get('metric')(self.model, eval_loader, self.device)
 
+
+def eval(eval_loader, model, metrics, device='cpu'):
+    model.eval()
+    
+    assert eval_loader != None
+    
+    for metric in metrics:
+        if metric.get('metric_name').lower() == 'accuracy':
+            metric.get('metric')(model, eval_loader, device)
 
 
 from .validation import evaluate
