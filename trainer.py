@@ -52,7 +52,7 @@ class Trainer:
         grad_count = 0
         epoch_count = 0
         
-        for it in range(self.epoch, self.epochs + 1):
+        for it in range(self.epoch + 1, self.epochs + 1):
             
             pbar = tqdm(self.dataloader, desc=f"Epoch {it}/{self.epochs}")
             for images, labels in pbar:

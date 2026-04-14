@@ -260,5 +260,5 @@ def get_criterion(ctype='softmax'):
     elif ctype.lower() == 'soft_margin':
         return SMCrossEntropyLoss()
     else:
-        raise ValueError("type must be 'softmax' or 'taylor_softmax'")
+        raise ValueError("type must be 'softmax' or 'taylor_softmax' or 'soft_margin'")
     
