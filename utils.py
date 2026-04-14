@@ -59,7 +59,7 @@ def load_checkpoint(file, model, head, optimizer):
 
         print(f"Successfully load model statedict with epoch {epoch}.\n")
         
-        return epoch + 1
+        return epoch
     
     return 1
 
@@ -242,23 +242,3 @@ def free_memory():
     import gc
     gc.collect()
     torch.cuda.empty_cache()
-    
-# git clone https://github.com/im-xiaoming/firework.git
-from firework.loss import TaylorCrossEntropyLoss, SMCrossEntropyLoss
-
-def get_criterion(ctype='softmax'):
-    """"
-    Get Criterion
-        type: strs, default: softmax; option: ["softmax", "taylor_softmax", "soft_margin"]
-    Returns:
-        nn.Module: criterion
-    """
-    if ctype.lower() == "softmax":
-        return nn.CrossEntropyLoss()
-    elif ctype.lower() == "taylor_softmax":
-        return TaylorCrossEntropyLoss()
-    elif ctype.lower() == 'soft_margin':
-        return SMCrossEntropyLoss()
-    else:
-        raise ValueError("type must be 'softmax' or 'taylor_softmax' or 'soft_margin'")
-    
